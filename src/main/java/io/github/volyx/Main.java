@@ -4,8 +4,12 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,10 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Main {
 
@@ -34,71 +37,121 @@ public class Main {
 //				frame.pack();
 			frame.setLocationByPlatform(true);
 
-
+			AtomicReference<String> dbPath = new AtomicReference<>();
 			JMenuBar menuBar = new JMenuBar();
+
 			JMenu fileMenu = new JMenu("File");
-			JMenuItem item = new JMenuItem("Item");
+			JMenuItem item = new JMenuItem("Open folder");
 			fileMenu.add(item);
-			item.addActionListener(e -> System.out.println("Here"));
 			menuBar.add(fileMenu);
 			frame.setJMenuBar(menuBar);
 			frame.setVisible(true);
 
 			RocksDbWrapper rocksDbWrapper = new RocksDbWrapper();
 
+
+
 			DefaultTableModel tableModel = createTableModel();
 			JTable table = new JTable(tableModel);
 
 			JTextField filterField = RowFilterUtil.createRowFilter(table);
-			JPanel jp = new JPanel();
-			jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
-			JButton go = new JButton("Select rocksdb folder");
+
+
+			JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			JSplitPane mainJPanel = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel );
+			//create the root node
+			DefaultMutableTreeNode root = new DefaultMutableTreeNode("Columns Family");
+
+			//create the tree by passing in the root node
+			JTree tree = new JTree(root);
+
+			tree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+				@Override
+				public void valueChanged(TreeSelectionEvent e) {
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+//					selectedLabel.setText(selectedNode.getUserObject().toString());
+					if (dbPath.get() != null && selectedNode.getParent() != null) {
+						System.out.println("select '" + selectedNode.getUserObject().toString() + "'");
+						final Map<String, String> keyValue = rocksDbWrapper.openDatabase(dbPath.get(), selectedNode.getUserObject().toString());
+						Vector<Vector<Object>> rows = new Vector<>();
+						for (Map.Entry<String, String> entry : keyValue.entrySet()) {
+							rows.add(new Vector<>(Arrays.asList(entry.getKey(), entry.getValue())));
+						}
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								tableModel.getDataVector().removeAllElements();
+								tableModel.getDataVector().addAll(rows);
+								tableModel.fireTableDataChanged();
+							}
+						});
+					}
+				}
+			});
+
+
+			leftPanel.add(new JScrollPane(tree));
+
+			rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 			JLabel label = new JLabel();
 			label.setText(NO_SELECTION);
-			go.addActionListener(e -> {
-				JFileChooser chooser = new JFileChooser();
-				chooser.setCurrentDirectory(new File("."));
-				chooser.setDialogTitle("Select");
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-				chooser.setAcceptAllFileFilterUsed(false);
-				//
-				final String selection;
-				if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
-					System.out.println("getCurrentDirectory(): "
-							+  chooser.getCurrentDirectory());
-					System.out.println("getSelectedFile() : " +  chooser.getSelectedFile());
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
 
-					selection = chooser.getSelectedFile().getPath();
+					JFileChooser chooser = new JFileChooser();
+					chooser.setCurrentDirectory(new File("."));
+					chooser.setDialogTitle("Select");
+					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-					SwingUtilities.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-//							tableModel.setRowCount(0);
-//							rows.clear();
-							Vector<Vector<Object>> rows = new Vector<>();
-							rocksDbWrapper.openDatabase(selection, rows);
-//							rows.add(new Vector<Object>(Arrays.asList("1", "2")));
-							tableModel.getDataVector().removeAllElements();
-							tableModel.getDataVector().addAll(rows);
-							tableModel.fireTableDataChanged();
-						}
-					});
+					chooser.setAcceptAllFileFilterUsed(false);
+					//
+					final String selection;
+					if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+//						System.out.println("getCurrentDirectory(): " +  chooser.getCurrentDirectory());
+//						System.out.println("getSelectedFile() : " +  chooser.getSelectedFile());
+
+						selection = chooser.getSelectedFile().getPath();
+						dbPath.set(selection);
+
+						final List<String> columnFamilies = rocksDbWrapper.listColumnFamilies(selection);
+
+						System.out.println("find " + columnFamilies);
+
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								root.removeAllChildren();
+
+								for (String c : columnFamilies) {
+									DefaultMutableTreeNode fruitNode = new DefaultMutableTreeNode(c);
+									root.add(fruitNode);
+									tree.expandPath(new TreePath(fruitNode.getPath()));
+								}
+								tree.treeDidChange();
+
+								label.setText(selection);
+							}
+						});
 
 
-				} else {
-					selection = NO_SELECTION;
+
+					} else {
+						selection = NO_SELECTION;
+					}
+
 				}
-				SwingUtilities.invokeLater(() -> label.setText(selection));
 			});
-			jp.add(go);
 
-			jp.add(label);
-			jp.add(filterField);
-			frame.add(jp, BorderLayout.NORTH);
+			rightPanel.add(label);
+			rightPanel.add(filterField);
+			frame.add(mainJPanel, BorderLayout.NORTH);
+
 
 			JScrollPane pane = new JScrollPane(table);
-			frame.add(pane, BorderLayout.CENTER);
+			rightPanel.add(pane, BorderLayout.CENTER);
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
 		});
