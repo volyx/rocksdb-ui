@@ -6,10 +6,10 @@
 
     <groupId>io.github.volyx</groupId>
     <artifactId>rocksdb-ui</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>RocksDB UI</name>
+    <name>RocksUI</name>
     <url>http://github.com/volyx/rocksdb-ui</url>
 
     <properties>
@@ -17,6 +17,8 @@
         <maven.compiler.target>10</maven.compiler.target>
         <maven.compiler.release>10</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <app.main.class>io.github.volyx.Main</app.main.class>
     </properties>
 
     <build>
@@ -35,25 +37,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
@@ -63,7 +46,7 @@
                             <classpathPrefix>lib/</classpathPrefix>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <mainClass>io.github.volyx.Main</mainClass>
+                            <mainClass>${app.main.class}</mainClass>
                         </manifest>
 
                     </archive>
@@ -74,6 +57,63 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${app.main.class}</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+
+                        <configuration>
+                            <executable>javapackager</executable>
+                            <arguments>
+                                <argument>-deploy</argument>
+                                <argument>-Bruntime=${JAVA_HOME}</argument>
+                                <argument>-native</argument>
+                                <argument>image</argument>
+                                <argument>-outdir</argument>
+                                <argument>release</argument>
+                                <argument>-outfile</argument>
+                                <argument>RocksUI.app</argument>
+                                <argument>-srcdir</argument>
+                                <argument>target</argument>
+                                <argument>-srcfiles</argument>
+                                <argument>${artifactId}-${version}.jar</argument>
+                                <argument>-appclass</argument>
+                                <argument>${app.main.class}</argument>
+                                <argument>-name</argument>
+                                <argument>"RocksUI"</argument>
+                                <argument>-title</argument>
+                                <argument>"RocksUI"</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
