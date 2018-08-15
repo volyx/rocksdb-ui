@@ -14,7 +14,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
@@ -172,17 +174,15 @@ public class Main {
 	}
 
 	private static JFrame createFrame() {
-		JFrame frame = new JFrame("Rockssb UI");
+		JFrame frame = new JFrame("RocksDB UI");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		try {
-			final URL url = Main.class.getClassLoader().getResource("doc.png");
-			Objects.requireNonNull(url);
-			File pathToFile = new File(url.getPath());
-			Image image = ImageIO.read(pathToFile);
+		try (InputStream is = Main.class.getClassLoader().getResourceAsStream("doc.png");) {
+			Objects.requireNonNull(is);
+			Image image = ImageIO.read(is);
 //			frame.setIconImage(image);
 			Taskbar.getTaskbar().setIconImage(image);
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 
 		frame.setSize(new Dimension(600, 450));
