@@ -31,6 +31,17 @@ public class Main {
 	public static void main(String[] args) {
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 		System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Name");
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
 		EventQueue.invokeLater(() -> {
 
 			JFrame frame = createFrame();
@@ -180,7 +191,9 @@ public class Main {
 			Objects.requireNonNull(is);
 			Image image = ImageIO.read(is);
 //			frame.setIconImage(image);
-			Taskbar.getTaskbar().setIconImage(image);
+			if (Taskbar.getTaskbar().isSupported(Taskbar.Feature.ICON_IMAGE)) {
+				Taskbar.getTaskbar().setIconImage(image);
+			}
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}

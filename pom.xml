@@ -78,45 +78,136 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>package-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
 
-                        <configuration>
-                            <executable>javapackager</executable>
-                            <arguments>
-                                <argument>-deploy</argument>
-                                <argument>-Bruntime=${JAVA_HOME}</argument>
-                                <argument>-native</argument>
-                                <argument>image</argument>
-                                <argument>-outdir</argument>
-                                <argument>release</argument>
-                                <argument>-outfile</argument>
-                                <argument>RocksUI.app</argument>
-                                <argument>-srcdir</argument>
-                                <argument>target</argument>
-                                <argument>-srcfiles</argument>
-                                <argument>${artifactId}-${version}.jar</argument>
-                                <argument>-appclass</argument>
-                                <argument>${app.main.class}</argument>
-                                <argument>-name</argument>
-                                <argument>"RocksUI"</argument>
-                                <argument>-title</argument>
-                                <argument>"RocksUI"</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>mac-os</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>package-mac-os</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+
+                                <configuration>
+                                    <executable>javapackager</executable>
+                                    <arguments>
+                                        <argument>-deploy</argument>
+                                        <argument>-Bruntime=${JAVA_HOME}</argument>
+                                        <argument>-native</argument>
+                                        <argument>image</argument>
+                                        <argument>-outdir</argument>
+                                        <argument>release</argument>
+                                        <argument>-outfile</argument>
+                                        <argument>RocksUI.app</argument>
+                                        <argument>-srcdir</argument>
+                                        <argument>target</argument>
+                                        <argument>-srcfiles</argument>
+                                        <argument>${artifactId}-${version}.jar</argument>
+                                        <argument>-appclass</argument>
+                                        <argument>${app.main.class}</argument>
+                                        <argument>-name</argument>
+                                        <argument>"RocksUI"</argument>
+                                        <argument>-title</argument>
+                                        <argument>"RocksUI"</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <!--javapackager -deploy -native -outdir packages -outfile myFile-->
+                            <!-- -srcdir documents -srcfiles Application.jar -appclass application.Main-->
+                            <!-- -name "Application" -title "Application Title"-->
+                            <execution>
+                                <id>package-windows</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+
+                                <configuration>
+                                    <executable>javapackager</executable>
+                                    <arguments>
+                                        <argument>-deploy</argument>
+                                        <!--<argument>-Bruntime=${JAVA_HOME}</argument>-->
+                                        <argument>-native</argument>
+                                        <argument>exe</argument>
+                                        <argument>-outdir</argument>
+                                        <argument>release</argument>
+                                        <argument>-outfile</argument>
+                                        <argument>RocksUI</argument>
+                                        <argument>-srcdir</argument>
+                                        <argument>target</argument>
+                                        <argument>-srcfiles</argument>
+                                        <argument>${artifactId}-${version}.jar</argument>
+                                        <argument>-appclass</argument>
+                                        <argument>${app.main.class}</argument>
+                                        <argument>-name</argument>
+                                        <argument>"RocksUI"</argument>
+                                        <argument>-title</argument>
+                                        <argument>"RocksUI"</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    <profile>
+        <id>windows</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <executions>
+                        <!--javapackager -deploy -native -outdir packages -outfile myFile-->
+                        <!-- -srcdir documents -srcfiles Application.jar -appclass application.Main-->
+                        <!-- -name "Application" -title "Application Title"-->
+                        <execution>
+                            <id>package-windows</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+
+                            <configuration>
+                                <executable>javapackager</executable>
+                                <arguments>
+                                    <argument>-deploy</argument>
+                                    <!--<argument>-Bruntime=${JAVA_HOME}</argument>-->
+                                    <argument>-native</argument>
+                                    <!--<argument>exe</argument>-->
+                                    <argument>-outdir</argument>
+                                    <argument>release</argument>
+                                    <argument>-outfile</argument>
+                                    <argument>RocksUI</argument>
+                                    <argument>-srcdir</argument>
+                                    <argument>target</argument>
+                                    <argument>-srcfiles</argument>
+                                    <argument>${artifactId}-${version}.jar</argument>
+                                    <argument>-appclass</argument>
+                                    <argument>${app.main.class}</argument>
+                                    <argument>-name</argument>
+                                    <argument>"RocksUI"</argument>
+                                    <argument>-title</argument>
+                                    <argument>"RocksUI"</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
