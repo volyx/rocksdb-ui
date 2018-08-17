@@ -5,234 +5,109 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.volyx</groupId>
-    <artifactId>rocksdb-ui</artifactId>
+    <artifactId>rocksdb-ui-group</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>RocksUI</name>
     <url>http://github.com/volyx/rocksdb-ui</url>
+
+    <modules>
+        <module>rocksdb-ui</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>10</maven.compiler.source>
         <maven.compiler.target>10</maven.compiler.target>
         <maven.compiler.release>10</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <app.main.class>io.github.volyx.Main</app.main.class>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.7.0</version>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>6.1.1</version> <!-- Use newer version of ASM -->
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <addClasspath>true</addClasspath>
-                                    <classpathPrefix>lib/</classpathPrefix>
-                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                                    <mainClass>${app.main.class}</mainClass>
-                                </manifest>
-
-                            </archive>
-
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.22.0</version>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                                <configuration>
-                                    <transformers>
-                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                            <mainClass>${app.main.class}</mainClass>
-                                        </transformer>
-                                    </transformers>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>mac-os</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>package-mac-os</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-
-                                <configuration>
-                                    <executable>javapackager</executable>
-                                    <arguments>
-                                        <argument>-deploy</argument>
-                                        <argument>-Bruntime=${JAVA_HOME}</argument>
-                                        <argument>-native</argument>
-                                        <argument>image</argument>
-                                        <argument>-outdir</argument>
-                                        <argument>release</argument>
-                                        <argument>-outfile</argument>
-                                        <argument>RocksUI.app</argument>
-                                        <argument>-srcdir</argument>
-                                        <argument>target</argument>
-                                        <argument>-srcfiles</argument>
-                                        <argument>${artifactId}-${version}.jar</argument>
-                                        <argument>-appclass</argument>
-                                        <argument>${app.main.class}</argument>
-                                        <argument>-name</argument>
-                                        <argument>"RocksUI"</argument>
-                                        <argument>-title</argument>
-                                        <argument>"RocksUI"</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                            <!--javapackager -deploy -native -outdir packages -outfile myFile-->
-                            <!-- -srcdir documents -srcfiles Application.jar -appclass application.Main-->
-                            <!-- -name "Application" -title "Application Title"-->
-                            <execution>
-                                <id>package-windows</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-
-                                <configuration>
-                                    <executable>javapackager</executable>
-                                    <arguments>
-                                        <argument>-deploy</argument>
-                                        <!--<argument>-Bruntime=${JAVA_HOME}</argument>-->
-                                        <argument>-native</argument>
-                                        <argument>exe</argument>
-                                        <argument>-outdir</argument>
-                                        <argument>release</argument>
-                                        <argument>-outfile</argument>
-                                        <argument>RocksUI</argument>
-                                        <argument>-srcdir</argument>
-                                        <argument>target</argument>
-                                        <argument>-srcfiles</argument>
-                                        <argument>${artifactId}-${version}.jar</argument>
-                                        <argument>-appclass</argument>
-                                        <argument>${app.main.class}</argument>
-                                        <argument>-name</argument>
-                                        <argument>"RocksUI"</argument>
-                                        <argument>-title</argument>
-                                        <argument>"RocksUI"</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    <profile>
-        <id>windows</id>
-        <build>
+    <build>
+        <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>2.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.7.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.ow2.asm</groupId>
+                            <artifactId>asm</artifactId>
+                            <version>6.1.1</version> <!-- Use newer version of ASM -->
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addClasspath>true</addClasspath>
+                                <classpathPrefix>lib/</classpathPrefix>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <mainClass>${app.main.class}</mainClass>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.1.1</version>
                     <executions>
-                        <!--javapackager -deploy -native -outdir packages -outfile myFile-->
-                        <!-- -srcdir documents -srcfiles Application.jar -appclass application.Main-->
-                        <!-- -name "Application" -title "Application Title"-->
                         <execution>
-                            <id>package-windows</id>
                             <phase>package</phase>
                             <goals>
-                                <goal>exec</goal>
+                                <goal>shade</goal>
                             </goals>
-
                             <configuration>
-                                <executable>javapackager</executable>
-                                <arguments>
-                                    <argument>-deploy</argument>
-                                    <!--<argument>-Bruntime=${JAVA_HOME}</argument>-->
-                                    <argument>-native</argument>
-                                    <!--<argument>exe</argument>-->
-                                    <argument>-outdir</argument>
-                                    <argument>release</argument>
-                                    <argument>-outfile</argument>
-                                    <argument>RocksUI</argument>
-                                    <argument>-srcdir</argument>
-                                    <argument>target</argument>
-                                    <argument>-srcfiles</argument>
-                                    <argument>${artifactId}-${version}.jar</argument>
-                                    <argument>-appclass</argument>
-                                    <argument>${app.main.class}</argument>
-                                    <argument>-name</argument>
-                                    <argument>"RocksUI"</argument>
-                                    <argument>-title</argument>
-                                    <argument>"RocksUI"</argument>
-                                </arguments>
+                                <transformers>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <mainClass>${app.main.class}</mainClass>
+                                    </transformer>
+                                </transformers>
                             </configuration>
                         </execution>
                     </executions>
                 </plugin>
             </plugins>
-        </build>
-    </profile>
-    </profiles>
+        </pluginManagement>
+    </build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-        <dependency>
-            <groupId>org.rocksdb</groupId>
-            <artifactId>rocksdbjni</artifactId>
-            <version>4.9.0</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.25</version>
+            </dependency>
+            <dependency>
+                <groupId>org.rocksdb</groupId>
+                <artifactId>rocksdbjni</artifactId>
+                <version>4.9.0</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.8.2</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
