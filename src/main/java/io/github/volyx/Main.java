@@ -2,23 +2,17 @@ package io.github.volyx;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,16 +57,15 @@ public class Main {
 			RocksDbWrapper rocksDbWrapper = new RocksDbWrapper();
 
 
-
 			DefaultTableModel tableModel = createTableModel();
 			JTable table = new JTable(tableModel);
 
 			JTextField filterField = RowFilterUtil.createRowFilter(table);
 
 
-			JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-			JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			JSplitPane mainJPanel = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel );
+			JPanel rightPanel = new JPanel();
+			JPanel leftPanel = new JPanel();
+			JSplitPane mainJPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
 			//create the root node
 			DefaultMutableTreeNode root = new DefaultMutableTreeNode("Columns Family");
 
@@ -148,7 +141,6 @@ public class Main {
 								label.setText(selection);
 							}
 						});
-
 
 
 					} else {
