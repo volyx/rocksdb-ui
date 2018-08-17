@@ -63,8 +63,8 @@ public class Main {
 			JTextField filterField = RowFilterUtil.createRowFilter(table);
 
 
-			JPanel rightPanel = new JPanel();
-			JPanel leftPanel = new JPanel();
+			JPanel rightPanel = new JPanel(new BorderLayout());
+			JPanel leftPanel = new JPanel(new BorderLayout());
 			JSplitPane mainJPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
 			//create the root node
 			DefaultMutableTreeNode root = new DefaultMutableTreeNode("Columns Family");
@@ -97,7 +97,7 @@ public class Main {
 			});
 
 
-			leftPanel.add(new JScrollPane(tree));
+			leftPanel.add(new JScrollPane(tree), BorderLayout.CENTER);
 
 			rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 			JLabel label = new JLabel();
@@ -150,8 +150,8 @@ public class Main {
 				}
 			});
 
-			rightPanel.add(label);
-			rightPanel.add(filterField);
+			rightPanel.add(label, BorderLayout.CENTER);
+			rightPanel.add(filterField, BorderLayout.CENTER);
 			frame.add(mainJPanel, BorderLayout.NORTH);
 
 
