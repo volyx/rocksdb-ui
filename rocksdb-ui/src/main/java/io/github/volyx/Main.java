@@ -66,6 +66,7 @@ public class Main {
 			JPanel rightPanel = new JPanel(new BorderLayout());
 			JPanel leftPanel = new JPanel(new BorderLayout());
 			JSplitPane mainJPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+			mainJPanel.setDividerLocation(0.5);
 			//create the root node
 			DefaultMutableTreeNode root = new DefaultMutableTreeNode("Columns Family");
 
@@ -99,7 +100,7 @@ public class Main {
 
 			leftPanel.add(new JScrollPane(tree), BorderLayout.CENTER);
 
-			rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+//			rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 			JLabel label = new JLabel();
 			label.setText(NO_SELECTION);
 
@@ -152,7 +153,7 @@ public class Main {
 
 			rightPanel.add(label, BorderLayout.CENTER);
 			rightPanel.add(filterField, BorderLayout.CENTER);
-			frame.add(mainJPanel, BorderLayout.NORTH);
+			frame.add(mainJPanel, BorderLayout.CENTER);
 
 
 			JScrollPane pane = new JScrollPane(table);
@@ -178,6 +179,8 @@ public class Main {
 
 	private static JFrame createFrame() {
 		JFrame frame = new JFrame("RocksDB UI");
+		JPanel rootPanel = new JPanel(new BorderLayout());
+		frame.setContentPane(rootPanel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		try (InputStream is = Main.class.getClassLoader().getResourceAsStream("doc.png");) {
 			Objects.requireNonNull(is);
